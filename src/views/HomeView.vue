@@ -432,6 +432,8 @@ export default defineComponent({
 
         const { data } = await api.post('emails', request)
 
+        if (data.data) return data.data
+
         return data
       } catch (error: any) {
         console.error(error)
