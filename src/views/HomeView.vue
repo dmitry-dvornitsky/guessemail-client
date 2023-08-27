@@ -2,12 +2,11 @@
   <div class="layout-content">
     <div class="title">Discover the Magic of AI in Email Finding</div>
     <div class="block-section">
+      <Toast class="toast" position="bottom-right" />
       <div class="flex items-center" v-if="isLoading">
         <ProgressSpinner />
       </div>
       <div class="flex flex-col" v-if="isSubmited">
-        <Toast class="toast" position="bottom-right" />
-
         <div v-for="(email, index) in sortedEmails" :key="index" class="">
           <div class="flex flex-col sm:flex-row justify-between items-center">
             <div class="text-900 font-medium mb-6 sm:mb-0">{{ email.email }}</div>
@@ -160,15 +159,15 @@
                   <InputText
                     id="location"
                     placeholder="United States"
-                    v-model="manualForm.location"
+                    v-model="manualForm.region"
                     :class="{
-                      'p-invalid': v$.manualForm.location.$error,
-                      'p-valid': !v$.manualForm.location.$error && v$.manualForm.location.$dirty
+                      'p-invalid': v$.manualForm.region.$error,
+                      'p-valid': !v$.manualForm.region.$error && v$.manualForm.region.$dirty
                     }"
                   />
                   <div
                     class="input-errors"
-                    v-for="error of v$.manualForm.location.$errors"
+                    v-for="error of v$.manualForm.region.$errors"
                     :key="error.$uid"
                   >
                     <small class="text-red-700">{{ error.$message }}</small>
@@ -188,7 +187,7 @@
               </div>
             </form>
           </TabPanel>
-          <TabPanel :disabled="true" header="By linkedin url (Coming Soon)">
+          <TabPanel header="By linkedin url">
             <form @submit.prevent="sendLinkedinForm()">
               <div class="grid mb-8">
                 <div class="flex flex-col gap-2">
@@ -283,7 +282,7 @@ export default defineComponent({
       website: '',
       headcount: '',
       industry: '',
-      location: ''
+      region: ''
     },
     linkedin: '',
     isSubmited: false,
@@ -300,7 +299,7 @@ export default defineComponent({
         website: { required },
         headcount: { required },
         industry: { required },
-        location: { required }
+        region: { required }
       },
       linkedin: { required }
     }
@@ -342,6 +341,67 @@ export default defineComponent({
       }
     },
 
+    async sendLinkedinForm() {
+      this.v$.linkedin.$touch()
+
+      if (!this.v$.linkedin.$errors.length) {
+        const linkedin = this.$data.linkedin
+
+        try {
+          this.isLoading = true
+
+          const lead = (
+            await axios.post(
+              'https://test-api.generect.co/api/linkedin/leads/by_link/',
+              { url: linkedin },
+              {
+                headers: {
+                  Authorization: `Token d9874cb73bd9800df6471cd043c9fa0b4823245a`
+                }
+              }
+            )
+          ).data.lead
+
+          const company = (
+            await axios.post(
+              'https://test-api.generect.co/api/linkedin/companies/by_link/',
+              { url: lead.company_url },
+              {
+                headers: {
+                  Authorization: `Token d9874cb73bd9800df6471cd043c9fa0b4823245a`
+                }
+              }
+            )
+          ).data.company
+
+          console.log(company)
+
+          const data: GetEmails.Request = {
+            firstName: lead.first_name,
+            lastName: lead.last_name,
+            jobTitle: lead.job_title,
+            website: company.domain,
+            headcount: company.headcount_range,
+            industry: lead.company_industry,
+            region: lead.location
+          }
+
+          const emails = await this.getEmails(data)
+
+          if (emails) {
+            this.emails = emails
+            this.isSubmited = true
+          }
+
+          console.log(lead)
+        } catch (error: any) {
+          console.error(error)
+        } finally {
+          this.isLoading = false
+        }
+      }
+    },
+
     resetManualForm() {
       Object.keys(this.$data.manualForm).forEach(
         //@ts-ignore
@@ -362,24 +422,12 @@ export default defineComponent({
       this.v$.linkedin.$reset()
     },
 
-    sendLinkedinForm() {
-      this.v$.linkedin.$touch()
-
-      if (!this.v$.linkedin.$errors.length) {
-        const data = this.$data.linkedin
-
-        console.log(data)
-      }
-    },
-
     async getEmails(request: GetEmails.Request): Promise<GetEmails.Response | undefined> {
       this.isLoading = true
 
       try {
-        //        baseURL: 'https://getemail-api-dq87w.ondigitalocean.app/'
-
         const api = axios.create({
-          baseURL: 'http://localhost:3000'
+          baseURL: 'https://getemail-api-dq87w.ondigitalocean.app'
         })
 
         const { data } = await api.post('emails', request)
