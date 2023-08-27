@@ -2,14 +2,15 @@
   <div class="layout-content">
     <div class="title">Discover the Magic of AI in Email Finding</div>
     <div class="block-section">
-      <Toast />
       <div class="flex items-center" v-if="isLoading">
         <ProgressSpinner />
       </div>
       <div class="flex flex-col" v-if="isSubmited">
+        <Toast class="toast" position="bottom-right" />
+
         <div v-for="(email, index) in sortedEmails" :key="index" class="">
-          <div class="flex justify-between items-center">
-            <div class="text-900 font-medium">{{ email.email }}</div>
+          <div class="flex flex-col sm:flex-row justify-between items-center">
+            <div class="text-900 font-medium mb-6 sm:mb-0">{{ email.email }}</div>
             <div class="flex items-center gap-6">
               <Avatar
                 :label="email.probability.toString()"
@@ -22,7 +23,9 @@
 
           <Divider />
         </div>
-        <div class="flex justify-center gap-6">
+        <div
+          class="flex flex-col-reverse sm:flex-col items-center sm:flex-row justify-center gap-6"
+        >
           <Button class="w-48" label="Back" @click="resetForms()" outlined />
           <Button class="w-48" label="Copy all emails" @click="copyEmails()" />
         </div>
@@ -31,7 +34,7 @@
         <TabView>
           <TabPanel header="Manual input">
             <form @submit.prevent="sendManualForm()">
-              <div class="grid grid-cols-3 gap-6 mb-6">
+              <div class="grid md:grid-cols-3 grid-cols-1 gap-6 mb-6">
                 <div class="flex flex-col gap-2">
                   <label for="firstName">First name</label>
                   <InputText
@@ -91,7 +94,7 @@
                 </div>
               </div>
               <Divider />
-              <div class="grid grid-cols-2 gap-6 mb-8">
+              <div class="grid md:grid-cols-2 grid-cols-1 gap-6 mb-8">
                 <div class="flex flex-col gap-2">
                   <label for="website">Company Website</label>
                   <InputText
@@ -132,7 +135,7 @@
                   </div>
                 </div>
               </div>
-              <div class="grid grid-cols-2 gap-6 mb-8">
+              <div class="grid md:grid-cols-2 md:grid-cols-1 gap-6 mb-8">
                 <div class="flex flex-col gap-2">
                   <label for="industry">Company Industry</label>
                   <InputText
@@ -173,7 +176,7 @@
                 </div>
               </div>
 
-              <div class="flex justify-center gap-6">
+              <div class="flex flex-col-reverse sm:flex-row items-center justify-center gap-6">
                 <Button class="w-48" label="Reset fields" @click="resetManualForm()" outlined />
                 <Button
                   type="submit"
@@ -310,7 +313,7 @@ export default defineComponent({
       const sortedEmails = emails.sort((a, b) => b.probability - a.probability)
 
       const normalizedEmails = sortedEmails.map((email) => {
-        const probability = Math.round(email.probability * 100)
+        const probability = Math.round(email.probability)
         return { email: email.email, probability }
       })
 
@@ -373,8 +376,10 @@ export default defineComponent({
       this.isLoading = true
 
       try {
+        //        baseURL: 'https://getemail-api-dq87w.ondigitalocean.app/'
+
         const api = axios.create({
-          baseURL: 'https://getemail-api-dq87w.ondigitalocean.app/'
+          baseURL: 'http://localhost:3000'
         })
 
         const { data } = await api.post('emails', request)
@@ -421,6 +426,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.toast {
+  left: 20px !important;
+  width: unset !important;
+}
+
 .p-valid {
   border-color: #22c55e;
 }
