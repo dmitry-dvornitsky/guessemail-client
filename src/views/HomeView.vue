@@ -22,9 +22,7 @@
 
           <Divider />
         </div>
-        <div
-          class="flex flex-col-reverse sm:flex-col items-center sm:flex-row justify-center gap-6"
-        >
+        <div class="flex flex-col-reverse items-center sm:flex-row justify-center gap-6">
           <Button class="w-48" label="Back" @click="resetForms()" outlined />
           <Button class="w-48" label="Copy all emails" @click="copyEmails()" />
         </div>
@@ -362,38 +360,43 @@ export default defineComponent({
             )
           ).data.lead
 
-          const company = (
-            await axios.post(
-              'https://test-api.generect.co/api/linkedin/companies/by_link/',
-              { url: lead.company_url },
-              {
-                headers: {
-                  Authorization: `Token d9874cb73bd9800df6471cd043c9fa0b4823245a`
+          if (lead.company_url) {
+            const company = (
+              await axios.post(
+                'https://test-api.generect.co/api/linkedin/companies/by_link/',
+                { url: lead.company_url },
+                {
+                  headers: {
+                    Authorization: `Token d9874cb73bd9800df6471cd043c9fa0b4823245a`
+                  }
                 }
-              }
-            )
-          ).data.company
+              )
+            ).data.company
 
-          console.log(company)
+            const data: GetEmails.Request = {
+              firstName: lead.first_name,
+              lastName: lead.last_name,
+              jobTitle: lead.job_title,
+              website: company.domain,
+              headcount: company.headcount_range,
+              industry: lead.company_industry,
+              region: lead.location
+            }
 
-          const data: GetEmails.Request = {
-            firstName: lead.first_name,
-            lastName: lead.last_name,
-            jobTitle: lead.job_title,
-            website: company.domain,
-            headcount: company.headcount_range,
-            industry: lead.company_industry,
-            region: lead.location
+            const emails = await this.getEmails(data)
+
+            if (emails) {
+              this.emails = emails
+              this.isSubmited = true
+            }
+          } else {
+            this.$toast.add({
+              severity: 'error',
+              summary: `Company error`,
+              detail: `The user does not have a company`,
+              life: 3000
+            })
           }
-
-          const emails = await this.getEmails(data)
-
-          if (emails) {
-            this.emails = emails
-            this.isSubmited = true
-          }
-
-          console.log(lead)
         } catch (error: any) {
           console.error(error)
         } finally {
