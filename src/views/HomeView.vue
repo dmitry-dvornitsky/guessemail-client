@@ -274,13 +274,13 @@ export default defineComponent({
 
   data: () => ({
     manualForm: {
-      firstName: 'Dmitry',
-      lastName: 'Dvornitsky',
-      jobTitle: 'Chief Technology Officer',
-      website: 'folderly.com',
-      headcount: '51-200',
-      industry: 'Technology, Information and Internet',
-      location: 'United States'
+      firstName: '',
+      lastName: '',
+      jobTitle: '',
+      website: '',
+      headcount: '',
+      industry: '',
+      location: ''
     },
     linkedin: '',
     isSubmited: false,
