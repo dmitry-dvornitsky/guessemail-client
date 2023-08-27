@@ -373,9 +373,8 @@ export default defineComponent({
       this.isLoading = true
 
       try {
-        // baseURL: 'https://getemail-api-dq87w.ondigitalocean.app/'
         const api = axios.create({
-          baseURL: 'http://localhost:3000'
+          baseURL: 'https://getemail-api-dq87w.ondigitalocean.app/'
         })
 
         const { data } = await api.post('emails', request)
