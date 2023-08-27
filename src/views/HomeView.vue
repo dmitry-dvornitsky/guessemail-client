@@ -433,6 +433,7 @@ export default defineComponent({
         const { data } = await api.post('emails', request)
 
         if (data.data) return data.data
+        if (data.results) return data.results
 
         return data
       } catch (error: any) {
