@@ -350,7 +350,7 @@ export default defineComponent({
 
           const lead = (
             await axios.post(
-              'https://test-api.generect.co/api/linkedin/leads/by_link/',
+              'https://api.generect.com/api/linkedin/leads/by_link/',
               { url: linkedin },
               {
                 headers: {
@@ -363,7 +363,7 @@ export default defineComponent({
           if (lead.company_url) {
             const company = (
               await axios.post(
-                'https://test-api.generect.co/api/linkedin/companies/by_link/',
+                'https://api.generect.com/api/linkedin/companies/by_link/',
                 { url: lead.company_url },
                 {
                   headers: {
